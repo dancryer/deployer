@@ -13,6 +13,7 @@ class HeartbeatTableSeeder extends Seeder
         Heartbeat::create([
             'name'       => 'My Cron Job',
             'project_id' => 1,
+            'hash'       => 'pbGMZbanJbndZylTZPIbxX5JzOVXhY',
             'interval'   => 30
         ]);
     }
