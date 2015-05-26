@@ -13,8 +13,6 @@ class DashboardControllerTest extends TestCase
 
     public function testDashboard()
     {
-        $this->seed();
-
         $user = User::where('email', 'stephen@rebelinblue.com')->firstOrFail();
 
         $this->be($user);
