@@ -7,6 +7,22 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
  */
 class Kernel extends HttpKernel
 {
+
+    /**
+     * The custom bootstrappers like Logging or Environment detector
+     * @var array
+     */
+    protected $customBooters = [
+        'Illuminate\Foundation\Bootstrap\ConfigureLogging' => 'App\Bootstrap\ConfigureLogging',
+    ];
+
+    /**
+     * Disable bootstrapper list
+     * @var array
+     */
+    protected $disabledBooters = [
+    ];
+
     /**
      * The application's global HTTP middleware stack.
      *
@@ -30,4 +46,28 @@ class Kernel extends HttpKernel
         'auth' => 'App\Http\Middleware\Authenticate',
         'guest' => 'App\Http\Middleware\RedirectIfAuthenticated',
     ];
+
+    /**
+     * Get the bootstrap classes for the application.
+     *
+     * @return array
+     */
+    protected function bootstrappers()
+    {
+        foreach ($this->bootstrappers as &$bootstrapper) {
+            foreach ($this->customBooters as $sourceBooter => $newBooter) {
+                if ($bootstrapper == $sourceBooter) {
+                    $bootstrapper = $newBooter;
+                    unset($this->customBooters[$sourceBooter]);
+                }
+            }
+        }
+        return array_merge(
+            array_diff(
+                $this->bootstrappers,
+                $this->disabledBooters
+            ),
+            $this->customBooters
+        );
+    }
 }

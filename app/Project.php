@@ -137,7 +137,7 @@ class Project extends Model implements PresentableInterface
      */
     public function deployments()
     {
-        return $this->hasMany('App\Deployment');
+        return $this->hasMany('App\Deployment')->orderBy('started_at', 'DESC');
     }
 
     /**
@@ -166,6 +166,15 @@ class Project extends Model implements PresentableInterface
     public function projectFiles()
     {
         return $this->hasMany('App\ProjectFile');
+    }
+
+    /**
+     * Has many relationship
+     * @return SharedFile
+     */
+    public function notifyEmails()
+    {
+        return $this->hasMany('App\NotifyEmail');
     }
 
     /**
@@ -202,7 +211,7 @@ class Project extends Model implements PresentableInterface
      *
      * @return string|false
      * @see \App\Project::accessDetails()
-     * @todo Should this be an attribute?
+     * TODO: Should this be an attribute?
      */
     public function repositoryPath()
     {
@@ -220,7 +229,7 @@ class Project extends Model implements PresentableInterface
      *
      * @return string|false
      * @see \App\Project::accessDetails()
-     * @todo Should this be an attribute?
+     * TODO: Should this be an attribute?
      */
     public function repositoryURL()
     {
@@ -248,7 +257,7 @@ class Project extends Model implements PresentableInterface
      *
      * @return string|false
      * @see \App\Project::accessDetails()
-     * @todo Should this be an attribute?
+     * TODO: Should this be an attribute?
      */
     public function branchURL()
     {

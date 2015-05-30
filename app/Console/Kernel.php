@@ -8,6 +8,22 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
  */
 class Kernel extends ConsoleKernel
 {
+
+    /**
+     * The custom bootstrappers like Logging or Environment detector
+     * @var array
+     */
+    protected $customBooters = [
+        'Illuminate\Foundation\Bootstrap\ConfigureLogging' => 'App\Bootstrap\ConfigureLogging',
+    ];
+
+    /**
+     * Disable bootstrapper list
+     * @var array
+     */
+    protected $disabledBooters = [
+    ];
+
     /**
      * The Artisan commands provided by your application.
      *
@@ -29,5 +45,29 @@ class Kernel extends ConsoleKernel
         $schedule->command('heartbeat:check')
                  ->everyFiveMinutes()
                  ->withoutOverlapping();
+    }
+
+    /**
+     * Get the bootstrap classes for the application.
+     *
+     * @return array
+     */
+    protected function bootstrappers()
+    {
+        foreach ($this->bootstrappers as &$bootstrapper) {
+            foreach ($this->customBooters as $sourceBooter => $newBooter) {
+                if ($bootstrapper == $sourceBooter) {
+                    $bootstrapper = $newBooter;
+                    unset($this->customBooters[$sourceBooter]);
+                }
+            }
+        }
+        return array_merge(
+            array_diff(
+                $this->bootstrappers,
+                $this->disabledBooters
+            ),
+            $this->customBooters
+        );
     }
 }

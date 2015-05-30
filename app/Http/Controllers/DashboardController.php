@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use Lang;
+use Response;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Repositories\Contracts\DeploymentRepositoryInterface;
@@ -16,7 +17,7 @@ class DashboardController extends Controller
      * The main page of the dashboard
      *
      * @return View
-     * @todo Use a decorator pattern here
+     * TODO: Use a decorator pattern here
      */
     public function index(
         DeploymentRepositoryInterface $deploymentRepository,
@@ -52,5 +53,24 @@ class DashboardController extends Controller
             'latest'   => $deploys_by_date,
             'projects' => $projects_by_group
         ]);
+    }
+
+    /**
+     * Generates an XML file for CCTray
+     *
+     * @param ProjectRepositoryInterface $projectRepository
+     * @return Response
+     */
+    public function cctray(ProjectRepositoryInterface $projectRepository)
+    {
+        $projects = $projectRepository->getAll();
+
+        foreach ($projects as $project) {
+            $project->latest_deployment = $project->deployments->first();
+        }
+
+        return Response::view('cctray', [
+            'projects' => $projects
+        ])->header('Content-Type', 'application/xml');
     }
 }

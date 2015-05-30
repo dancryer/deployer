@@ -9,7 +9,7 @@ use App\Server;
 use App\Command as Stage;
 use App\Project;
 use App\Commands\Command;
-use App\Commands\Notify;
+use App\Events\DeployFinished;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Bus\SelfHandling;
@@ -18,7 +18,7 @@ use Symfony\Component\Process\Process;
 
 /**
  * Deploys an actual project
- * @todo: rewrite this as it is doing way too much and is very messy now
+ * TODO: rewrite this as it is doing way too much and is very messy now
  */
 class DeployProject extends Command implements SelfHandling, ShouldBeQueued
 {
@@ -89,9 +89,8 @@ class DeployProject extends Command implements SelfHandling, ShouldBeQueued
         $project->last_run = date('Y-m-d H:i:s');
         $project->save();
 
-        foreach ($project->notifications as $notification) {
-            Queue::pushOn('notify', new Notify($notification, $this->deployment->notificationPayload()));
-        }
+        // Notify user or others the deployment has been finished
+        event(new DeployFinished($project, $this->deployment));
 
         unlink($this->private_key);
     }
@@ -101,7 +100,7 @@ class DeployProject extends Command implements SelfHandling, ShouldBeQueued
      * the deployment model
      *
      * @return void
-     * @todo  Change this to use the Gitlab API
+     * TODO: Change this to use the Gitlab API
      */
     private function updateRepoInfo()
     {
@@ -150,7 +149,7 @@ CMD;
      * Removed left over artifacts from a failed deploy on each server
      *
      * @return void
-     * @todo Clean this up as there is some duplication with getScript()
+     * TODO: Clean this up as there is some duplication with getScript()
      */
     private function cleanupDeployment()
     {
@@ -213,7 +212,7 @@ CMD;
      * @param DeployStep $step
      * @return void
      * @throws \RuntimeException
-     * @todo Remove build on failure
+     * TODO: Remove build on failure
      */
     private function runStep(DeployStep $step)
     {
