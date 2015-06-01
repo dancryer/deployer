@@ -18,6 +18,13 @@ class Group extends Model
     protected $fillable = ['name'];
 
     /**
+     * The attributes excluded from the model's JSON form.
+     *
+     * @var array
+     */
+    protected $hidden = ['created_at', 'deleted_at', 'updated_at'];
+
+    /**
      * Additional attributes to include in the JSON representation
      *
      * @var array

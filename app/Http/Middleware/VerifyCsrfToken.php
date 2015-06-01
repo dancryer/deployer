@@ -33,7 +33,8 @@ class VerifyCsrfToken extends BaseVerifier
     protected function excludedRoutes($request)
     {
         $routes = [
-            'deploy/*'
+            'deploy/*',
+            'api/*'
         ];
 
         foreach ($routes as $route) {
