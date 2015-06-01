@@ -5,7 +5,7 @@ use App\Http\Controllers\API\ProjectController as ProjectAPIController;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
 
 /**
- * The controller for managging projects
+ * The controller for managing projects
  */
 class ProjectController extends ProjectAPIController
 {
