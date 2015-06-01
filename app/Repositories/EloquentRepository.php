@@ -23,6 +23,17 @@ abstract class EloquentRepository
     }
 
     /**
+     * Get instance by it's ID
+     *
+     * @param int $model_id
+     * @return Model
+     */
+    public function getById($model_id)
+    {
+        return $this->model->findOrFail($model_id);
+    }
+
+    /**
      * Creates a new instance of the model
      *
      * @param array $fields
@@ -47,5 +58,18 @@ abstract class EloquentRepository
         $model->update($fields);
 
         return $model;
+    }
+
+    /**
+     * Delete an instance by it's ID
+     *
+     * @param int $model_id
+     * @return Model
+     */
+    public function delete($model_id)
+    {
+        $model = $this->model->findOrFail($model_id);
+
+        return $model->delete();
     }
 }

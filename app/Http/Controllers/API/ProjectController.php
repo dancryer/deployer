@@ -11,25 +11,42 @@ use App\Http\Requests\StoreProjectRequest;
 class ProjectController extends Controller
 {
     /**
+     * The project repository
+     *
+     * @var ProjectRepositoryInterface
+     */
+    protected $projectRepository;
+
+    /**
+     * Class constructor
+     *
+     * @param GroupRepositoryInterface $projectRepository
+     * @return void
+     */
+    public function __construct(ProjectRepositoryInterface $projectRepository)
+    {
+        $this->projectRepository = $projectRepository;
+    }
+
+    /**
      * Shows all projects
      *
-     * @param ProjectRepositoryInterface $projectRepository
      * @return Response
      */
-    public function index(ProjectRepositoryInterface $projectRepository)
+    public function index()
     {
-        return $projectRepository->getAll();
+        return $this->projectRepository->getAll();
     }
 
     /**
      * Shows a project
      *
-     * @param ProjectRepositoryInterface $projectRepository
+     * @param int $project_id
      * @return Response
      */
-    public function show(Project $project)
+    public function show($project_id)
     {
-        return $project;
+        return $this->projectRepository->getById($project_id);
     }
 
     /**
@@ -40,7 +57,7 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        $project = Project::create($request->only(
+        return $this->projectRepository->create($request->only(
             'name',
             'repository',
             'branch',
@@ -49,20 +66,18 @@ class ProjectController extends Controller
             'url',
             'build_url'
         ));
-
-        return $project;
     }
 
     /**
      * Update the specified project in storage.
      *
-     * @param Project $project
+     * @param int $project_id
      * @param StoreProjectRequest $request
      * @return Response
      */
-    public function update(Project $project, StoreProjectRequest $request)
+    public function update($project_id, StoreProjectRequest $request)
     {
-        $project->update($request->only(
+        return $this->projectRepository->updateById($request->only(
             'name',
             'repository',
             'branch',
@@ -70,20 +85,18 @@ class ProjectController extends Controller
             'builds_to_keep',
             'url',
             'build_url'
-        ));
-
-        return $project;
+        ), $project_id);
     }
 
     /**
      * Remove the specified project from storage.
      *
-     * @param Project $project
+     * @param int $project_id
      * @return Response
      */
-    public function destroy(Project $project)
+    public function destroy($project_id)
     {
-        $project->delete();
+        $this->projectRepository->delete($project_id);
 
         return [
             'success' => true

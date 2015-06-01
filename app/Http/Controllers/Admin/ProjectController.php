@@ -1,23 +1,22 @@
 <?php namespace App\Http\Controllers\Admin;
 
 use Lang;
-use App\Http\Controllers\API\ProjectController as ProjectAPIController;
+use App\Http\Controllers\API\ProjectController as ProjectResourceController;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
 
 /**
  * The controller for managing projects
  */
-class ProjectController extends ProjectAPIController
+class ProjectController extends ProjectResourceController
 {
     /**
      * Shows all projects
      *
-     * @param ProjectRepositoryInterface $projectRepository
      * @return Response
      */
-    public function index(ProjectRepositoryInterface $projectRepository)
+    public function index()
     {
-        $projects = $projectRepository->getAll();
+        $projects = $this->projectRepository->getAll();
 
         return view('projects.listing', [
             'title'    => Lang::get('projects.manage'),
