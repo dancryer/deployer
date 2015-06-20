@@ -82,6 +82,10 @@ Route::group(['middleware' => 'auth'], function () {
             'only' => ['index', 'store', 'update'],
         ]);
 
+        Route::get('integrations', 'IntegrationController@index');
+        Route::get('integrations/auth/{service}', 'IntegrationController@auth');
+        Route::get('integrations/callback/{service}', 'IntegrationController@callback');
+
     });
 
 });
