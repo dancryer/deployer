@@ -86,11 +86,11 @@ Route::group(['middleware' => 'auth'], function () {
 
 Route::group(['prefix' => 'api', 'namespace' => 'API'], function () {
     Route::resource('projects', 'ProjectController', [
-        'only' => ['index', 'show', 'store', 'update', 'destroy']
+        'only' => ['index', 'show', 'store', 'update', 'destroy'],
     ]);
 
     Route::resource('groups', 'GroupController', [
-        'only' => ['index', 'show', 'store', 'update', 'destroy']
+        'only' => ['index', 'show', 'store', 'update', 'destroy'],
     ]);
 });
 

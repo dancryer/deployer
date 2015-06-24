@@ -1,63 +1,37 @@
-<?php namespace App\Http\Controllers\API;
+<?php
+
+namespace App\Http\Controllers\API;
 
 use App\Group;
-use App\Http\Controllers\Controller;
-use App\Repositories\Contracts\GroupRepositoryInterface;
+use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreGroupRequest;
+use App\Repositories\Contracts\GroupRepositoryInterface;
 
 /**
- * The controller for managing groups
+ * The controller for managing groups.
  */
 class GroupController extends Controller
 {
     /**
-     * The project repository
+     * Class constructor.
      *
-     * @var GroupRepositoryInterface
-     */
-    protected $groupRepository;
-
-    /**
-     * Class constructor
-     *
-     * @param GroupRepositoryInterface $groupRepository
+     * @param  GroupRepositoryInterface $repository
      * @return void
      */
-    public function __construct(GroupRepositoryInterface $groupRepository)
+    public function __construct(GroupRepositoryInterface $repository)
     {
-        $this->groupRepository = $groupRepository;
-    }
-
-    /**
-     * Shows all projects
-     *
-     * @return Response
-     */
-    public function index()
-    {
-        return $this->groupRepository->getAll();
-    }
-
-    /**
-     * Shows a group
-     *
-     * @param int $group_id
-     * @return Response
-     */
-    public function show($group_id)
-    {
-        return $this->groupRepository->getById($group_id);
+        $this->repository = $repository;
     }
 
     /**
      * Store a newly created group in storage.
      *
-     * @param StoreGroupRequest $request
+     * @param  StoreGroupRequest $request
      * @return Response
      */
     public function store(StoreGroupRequest $request)
     {
-        return $this->groupRepository->create($request->only(
+        return $this->repository->create($request->only(
             'name'
         ));
     }
@@ -65,13 +39,13 @@ class GroupController extends Controller
     /**
      * Update the specified group in storage.
      *
-     * @param int $group_id
-     * @param StoreGroupRequest $request
+     * @param  int               $group_id
+     * @param  StoreGroupRequest $request
      * @return Response
      */
     public function update($group_id, StoreGroupRequest $request)
     {
-        return $this->groupRepository->updateById($request->only(
+        return $this->repository->updateById($request->only(
             'name'
         ), $group_id);
     }
