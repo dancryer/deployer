@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\API\ProjectController as ProjectAPIController;
-use App\Http\Requests\StoreProjectRequest;
-use App\Repositories\Contracts\ProjectRepositoryInterface;
 use App\Repositories\Contracts\TemplateRepositoryInterface;
 use Lang;
 

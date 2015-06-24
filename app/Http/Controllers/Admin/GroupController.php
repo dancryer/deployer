@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\API\GroupController as GroupAPIController;
-use App\Http\Requests\StoreGroupRequest;
-use App\Repositories\Contracts\GroupRepositoryInterface;
 use Lang;
 
 /**
