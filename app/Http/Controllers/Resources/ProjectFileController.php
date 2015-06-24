@@ -1,13 +1,25 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use App\ProjectFile;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests\StoreProjectFileRequest;
+use App\Repositories\Contracts\ProjectFileRepositoryInterface;
 
 /**
- * Manage the project global file like some environment files
+ * Manage the project global file like some environment files.
  */
 class ProjectFileController extends ResourceController
 {
+    /**
+     * Class constructor.
+     *
+     * @param  ProjectFileRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(ProjectFileRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -16,7 +28,7 @@ class ProjectFileController extends ResourceController
      */
     public function store(StoreProjectFileRequest $request)
     {
-        return ProjectFile::create($request->only(
+        return $this->repository->create($request->only(
             'name',
             'path',
             'content',
@@ -27,32 +39,15 @@ class ProjectFileController extends ResourceController
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  int      $file_id
      * @return Response
      */
-    public function update(ProjectFile $file, StoreProjectFileRequest $request)
+    public function update($file_id, StoreProjectFileRequest $request)
     {
-        $file->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'path',
             'content'
-        ));
-
-        return $file;
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return Response
-     */
-    public function destroy(ProjectFile $file)
-    {
-        $file->delete();
-
-        return [
-            'success' => true
-        ];
+        ), $file_id);
     }
 }

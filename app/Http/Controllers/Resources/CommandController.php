@@ -1,139 +1,117 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use Lang;
-use Input;
-use App\Project;
+namespace App\Http\Controllers\Resources;
+
 use App\Command;
-use App\ServerLog;
-use App\Http\Requests;
 use App\Http\Requests\StoreCommandRequest;
-use Illuminate\Http\Request;
+use App\Repositories\Contracts\CommandRepositoryInterface;
+use App\Repositories\Contracts\ProjectRepositoryInterface;
+use Input;
+use Lang;
 
 /**
- * Controller for managing commands
+ * Controller for managing commands.
  */
 class CommandController extends ResourceController
 {
     /**
-     * Display a listing of before/after commands for the supplied stage
+     * The project repository.
      *
-     * @param Project $project
-     * @param string $action Either clone, install, activate or purge
+     * @var ProjectRepositoryInterface
+     */
+    private $projectRepository;
+
+    /**
+     * Class constructor.
+     *
+     * @param  CommandRepositoryInterface $commandRepository
+     * @return void
+     */
+    public function __construct(
+        CommandRepositoryInterface $commandRepository,
+        ProjectRepositoryInterface $projectRepository
+    ) {
+        $this->repository        = $commandRepository;
+        $this->projectRepository = $projectRepository;
+    }
+
+    /**
+     * Display a listing of before/after commands for the supplied stage.
+     *
+     * @param  int      $project_id
+     * @param  string   $action     Either clone, install, activate or purge
      * @return Response
      */
-    public function listing(Project $project, $action)
+    public function listing($project_id, $action)
     {
         $types = [
             'clone'    => Command::DO_CLONE,
             'install'  => Command::DO_INSTALL,
             'activate' => Command::DO_ACTIVATE,
-            'purge'    => Command::DO_PURGE
+            'purge'    => Command::DO_PURGE,
         ];
 
-        // fixme: use a repository
-        $commands = Command::where('project_id', $project->id)
-                           ->whereIn('step', array($types[$action] - 1, $types[$action] + 1))
-                           ->orderBy('order')
-                           ->get();
+        $project = $this->projectRepository->getById($project_id);
 
-        // fixme: there has to be a better way to do this
-        // this triggers the servers to be loaded so that they exist in the model
-        foreach ($commands as $command) {
-            $command->servers;
+        $breadcrumb = [
+            ['url' => url('projects', $project->id), 'label' => $project->name],
+        ];
+
+        if ($project->is_template) {
+            $breadcrumb = [
+                ['url' => url('admin/templates'), 'label' => Lang::get('templates.label')],
+                ['url' => url('admin/templates', $project->id), 'label' => $project->name],
+            ];
         }
 
         return view('commands.listing', [
-            'breadcrumb' => [
-                ['url' => url('projects', $project->id), 'label' => $project->name]
-            ],
+            'breadcrumb' => $breadcrumb,
             'title'      => Lang::get('commands.' . strtolower($action)),
             'project'    => $project,
             'action'     => $types[$action],
-            'commands'   => $commands
+            'commands'   => $this->repository->getForDeployStep($project->id, $types[$action]),
         ]);
     }
 
     /**
      * Store a newly created command in storage.
      *
-     * @param StoreCommandRequest $request
+     * @param  StoreCommandRequest $request
      * @return Response
      */
     public function store(StoreCommandRequest $request)
     {
-        // fixme: use a repository
-        $max = Command::where('project_id', $request->project_id)
-                      ->where('step', $request->step)
-                      ->orderBy('order', 'desc')
-                      ->first();
-
-        $order = 0;
-        if (isset($max)) {
-            $order = $max->order + 1;
-        }
-
-        $fields = $request->only(
+        return $this->repository->create($request->only(
             'name',
             'user',
             'project_id',
             'script',
             'step',
-            'optional'
-        );
-
-        $fields['order'] = $order;
-
-        $command = Command::create($fields);
-
-        $command->servers()->attach($request->servers);
-
-        $command->servers; // Triggers the loading
-
-        return $command;
+            'optional',
+            'servers'
+        ));
     }
 
     /**
      * Update the specified command in storage.
      *
-     * @param Command $command
-     * @param StoreCommandRequest $request
+     * @param  int                 $command_id
+     * @param  StoreCommandRequest $request
      * @return Response
      */
-    public function update(Command $command, StoreCommandRequest $request)
+    public function update($command_id, StoreCommandRequest $request)
     {
-        $command->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'user',
             'script',
-            'optional'
-        ));
-
-        $command->save();
-
-        $command->servers()->sync($request->servers);
-
-        $command->servers; // Triggers the loading
-
-        return $command;
+            'optional',
+            'servers'
+        ), $command_id);
     }
 
     /**
-     * Remove the specified command from storage.
-     *
-     * @param Command $command
-     * @return Response
-     */
-    public function destroy(Command $command)
-    {
-        $command->delete();
-
-        return [
-            'success' => true
-        ];
-    }
-
-    /**
-     * Re-generates the order for the supplied commands
+     * Re-generates the order for the supplied commands.
      *
      * @return Response
      */
@@ -142,49 +120,15 @@ class CommandController extends ResourceController
         $order = 0;
 
         foreach (Input::get('commands') as $command_id) {
-            $command = Command::findOrFail($command_id);
-
-            $command->order = $order;
-
-            $command->save();
+            $this->repository->updateById([
+                'order' => $order,
+            ], $command_id);
 
             $order++;
         }
 
         return [
-            'success' => true
+            'success' => true,
         ];
-    }
-
-    /**
-     * Gets the status of a particular deployment step
-     *
-     * @param ServerLog $log
-     * @param boolean $include_log
-     * @return Response
-     * TODO: Move this to deployment controller
-     */
-    public function status(ServerLog $log, $include_log = false)
-    {
-        $log->runtime  = ($log->runtime() === false ? null : human_readable_duration($log->runtime()));
-        $log->script   = '';
-
-        if (!$include_log) {
-            $log->output = ((is_null($log->output) || !strlen($log->output)) ? null : '');
-        }
-
-        return $log;
-    }
-
-    /**
-     * Gets the log output of a particular deployment step
-     *
-     * @param ServerLog $log
-     * @return Response
-     * TODO: Move this to deployment controller
-     */
-    public function log(ServerLog $log)
-    {
-        return $this->status($log, true);
     }
 }

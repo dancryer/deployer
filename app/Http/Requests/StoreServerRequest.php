@@ -1,17 +1,19 @@
-<?php namespace App\Http\Requests;
+<?php
+
+namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
 use Illuminate\Validation\Factory;
 
 /**
- * Request for validating servers
+ * Request for validating servers.
  */
 class StoreServerRequest extends Request
 {
     /**
-     * Overwrite the parent constructor to define a new validator
+     * Overwrite the parent constructor to define a new validator.
      *
-     * @param Factory $factory
+     * @param  Factory $factory
      * @return void
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
@@ -41,11 +43,12 @@ class StoreServerRequest extends Request
     public function rules()
     {
         return [
-            'name'       => 'required|max:255',
-            'user'       => 'required|max:255',
-            'ip_address' => 'required|host',
-            'path'       => 'required',
-            'project_id' => 'required|integer|exists:projects,id'
+            'name'         => 'required|max:255',
+            'user'         => 'required|max:255',
+            'ip_address'   => 'required|host',
+            'path'         => 'required',
+            'add_commands' => 'boolean',
+            'project_id'   => 'required|integer|exists:projects,id',
         ];
     }
 }

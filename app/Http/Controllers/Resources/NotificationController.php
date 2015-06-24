@@ -1,61 +1,59 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use App\Notification;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests\StoreNotificationRequest;
+use App\Repositories\Contracts\NotificationRepositoryInterface;
 
 /**
- * Controller for managing notifications
+ * Controller for managing notifications.
  */
 class NotificationController extends ResourceController
 {
     /**
+     * Class constructor.
+     *
+     * @param  NotificationRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(NotificationRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
      * Store a newly created notification in storage.
      *
-     * @param StoreNotificationRequest $request
+     * @param  StoreNotificationRequest $request
      * @return Response
      */
     public function store(StoreNotificationRequest $request)
     {
-        return Notification::create($request->only(
+        return $this->repository->create($request->only(
             'name',
             'channel',
             'webhook',
             'project_id',
-            'icon'
+            'icon',
+            'failure_only'
         ));
     }
 
     /**
      * Update the specified notification in storage.
      *
-     * @param Notification $notification
-     * @param StoreNotificationRequest $request
+     * @param  int                      $notification_id
+     * @param  StoreNotificationRequest $request
      * @return Response
      */
-    public function update(Notification $notification, StoreNotificationRequest $request)
+    public function update($notification_id, StoreNotificationRequest $request)
     {
-        $notification->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'channel',
             'webhook',
-            'icon'
-        ));
-
-        return $notification;
-    }
-
-    /**
-     * Remove the specified notification from storage.
-     *
-     * @param Notification $notification
-     * @return Response
-     */
-    public function destroy(Notification $notification)
-    {
-        $notification->delete();
-
-        return [
-            'success' => true
-        ];
+            'icon',
+            'failure_only'
+        ), $notification_id);
     }
 }

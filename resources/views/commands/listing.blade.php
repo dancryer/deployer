@@ -12,6 +12,13 @@
         <td data-command-id="<%- id %>"><%- name %></td>
         <td><%- user %></td>
         <td>
+            <% if (optional) { %>
+                {{ Lang::get('app.yes') }}
+            <% } else { %>
+                {{ Lang::get('app.no') }}
+            <% } %>
+        </td>
+        <td>
             <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default btn-edit" title="{{ Lang::get('commands.edit') }}" data-toggle="modal" data-target="#command"><i class="fa fa-edit"></i></button>
             </div>
@@ -28,5 +35,8 @@
     <script type="text/javascript">
         new app.CommandsTab();
         app.Commands.add({!! $commands->toJson() !!});
+
+        app.project_id = {{ $project->id }};
+        app.command_action = {{ $action }};
     </script>
 @stop

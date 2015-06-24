@@ -1,47 +1,57 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use Response;
-use Queue;
-use App\Server;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests;
-use App\Commands\TestServerConnection;
 use App\Http\Requests\StoreServerRequest;
+use App\Repositories\Contracts\ServerRepositoryInterface;
+use Input;
 
 /**
- * Server management controller
+ * Server management controller.
  */
 class ServerController extends ResourceController
 {
     /**
+     * Class constructor.
+     *
+     * @param  ServerRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(ServerRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
      * Store a newly created server in storage.
      *
-     * @param StoreServerRequest $request
+     * @param  StoreServerRequest $request
      * @return Response
      */
     public function store(StoreServerRequest $request)
     {
-        return Server::create($request->only(
+        return $this->repository->create($request->only(
             'name',
             'user',
             'ip_address',
             'port',
             'path',
             'project_id',
-            'deploy_code'
+            'deploy_code',
+            'add_commands'
         ));
     }
 
     /**
      * Update the specified server in storage.
      *
-     * @param Server $server
-     * @param StoreServerRequest $request
+     * @param  StoreServerRequest $request
      * @return Response
-     * TODO: Shouldn't changing the status on IP change be up to the model not the controller?
      */
-    public function update(Server $server, StoreServerRequest $request)
+    public function update($server_id, StoreServerRequest $request)
     {
-        $server->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'user',
             'ip_address',
@@ -49,42 +59,43 @@ class ServerController extends ResourceController
             'path',
             'project_id',
             'deploy_code'
-        ));
-
-        return $server;
+        ), $server_id);
     }
 
     /**
-     * Remove the specified server from storage.
+     * Queues a connection test for the specified server.
      *
-     * @param Server $server
+     * @param  int      $server_id
      * @return Response
      */
-    public function destroy(Server $server)
+    public function test($server_id)
     {
-        $server->delete();
+        $this->repository->queueForTesting($server_id);
 
         return [
-            'success' => true
+            'success' => true,
         ];
     }
 
     /**
-     * Queues a connection test for the specified server
+     * Re-generates the order for the supplied servers.
      *
-     * @param Server $server
      * @return Response
-     * TODO: Shouldn't changing the status to testing automatically add the model to the queue on save?
      */
-    public function test(Server $server)
+    public function reorder()
     {
-        $server->status = Server::TESTING;
-        $server->save();
+        $order = 0;
 
-        Queue::pushOn('connections', new TestServerConnection($server));
+        foreach (Input::get('servers') as $server_id) {
+            $this->repository->updateById([
+                'order' => $order,
+            ], $server_id);
+
+            $order++;
+        }
 
         return [
-            'success' => true
+            'success' => true,
         ];
     }
 }

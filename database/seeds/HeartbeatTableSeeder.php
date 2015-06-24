@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
 use App\Heartbeat;
+use Illuminate\Database\Seeder;
 
 class HeartbeatTableSeeder extends Seeder
 {
@@ -13,7 +12,7 @@ class HeartbeatTableSeeder extends Seeder
         Heartbeat::create([
             'name'       => 'My Cron Job',
             'project_id' => 1,
-            'interval'   => 30
+            'interval'   => 30,
         ]);
     }
 }

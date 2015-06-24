@@ -14,62 +14,72 @@
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/', 'DashboardController@index');
+    Route::get('/timeline', 'DashboardController@timeline');
 
     Route::get('webhook/{projects}/refresh', 'WebhookController@refresh');
 
     Route::get('projects/{projects}', 'DeploymentController@project');
-    
+
     Route::post('projects/{projects}/deploy', [
         'as'   => 'deploy',
-        'uses' => 'DeploymentController@deploy'
+        'uses' => 'DeploymentController@deploy',
     ]);
 
     // Deployment details
     Route::get('deployment/{deployments}', [
         'as'   => 'deployment',
-        'uses' => 'DeploymentController@show'
+        'uses' => 'DeploymentController@show',
     ]);
 
-    Route::group(['namespace' => 'Resources'], function () {
+    Route::get('log/{log}', 'DeploymentController@log');
 
-        Route::get('status/{log}', 'CommandController@status');
-        Route::get('log/{log}', 'CommandController@log');
+    Route::group(['namespace' => 'Resources'], function () {
 
         Route::post('commands/reorder', 'CommandController@reorder');
 
         Route::get('projects/{projects}/commands/{step}', [
             'as'   => 'commands',
-            'uses' => 'CommandController@listing'
+            'uses' => 'CommandController@listing',
         ]);
 
+        Route::post('servers/reorder', 'ServerController@reorder');
         Route::get('servers/{servers}/test', 'ServerController@test');
 
         $actions = [
-            'only' => ['store', 'update', 'destroy']
+            'only' => ['store', 'update', 'destroy'],
         ];
 
-        Route::resource('commands', 'CommandController', $actions);
         Route::resource('servers', 'ServerController', $actions);
+        Route::resource('commands', 'CommandController', $actions);
         Route::resource('heartbeats', 'HeartbeatController', $actions);
         Route::resource('notifications', 'NotificationController', $actions);
         Route::resource('shared-files', 'SharedFilesController', $actions);
         Route::resource('project-file', 'ProjectFileController', $actions);
         Route::resource('notify-email', 'NotifyEmailController', $actions);
         Route::resource('check-url', 'CheckUrlController', $actions);
+
+        Route::get('admin/templates/{projects}/commands/{step}', [
+            'as'   => 'template.commands',
+            'uses' => 'CommandController@listing',
+        ]);
     });
 
     Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
+        Route::resource('templates', 'TemplateController', [
+            'only' => ['index', 'store', 'update', 'destroy', 'show'],
+        ]);
+
         Route::resource('projects', 'ProjectController', [
-            'only' => ['index', 'store', 'update', 'destroy']
+            'only' => ['index', 'store', 'update', 'destroy'],
         ]);
 
         Route::resource('users', 'UserController', [
-            'only' => ['index', 'store', 'update', 'destroy']
+            'only' => ['index', 'store', 'update', 'destroy'],
         ]);
 
         Route::resource('groups', 'GroupController', [
-            'only' => ['index', 'store', 'update']
+            'only' => ['index', 'store', 'update'],
         ]);
     });
 });
@@ -87,17 +97,19 @@ Route::group(['prefix' => 'api', 'namespace' => 'API'], function () {
 // Webhooks
 Route::post('deploy/{hash}', [
     'as'   => 'webhook',
-    'uses' => 'WebhookController@webhook'
+    'uses' => 'WebhookController@webhook',
 ]);
 
 Route::get('cctray.xml', 'DashboardController@cctray');
 
-Route::get('heartbeat/{hash}', [
-    'as'   => 'heartbeat',
-    'uses' => 'HeartbeatController@ping'
-]);
+Route::group(['namespace' => 'Resources'], function () {
+    Route::get('heartbeat/{hash}', [
+        'as'   => 'heartbeat',
+        'uses' => 'HeartbeatController@ping',
+    ]);
+});
 
 Route::controllers([
     'auth'     => 'Auth\AuthController',
-    'password' => 'Auth\PasswordController'
+    'password' => 'Auth\PasswordController',
 ]);

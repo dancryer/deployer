@@ -1,10 +1,8 @@
 <?php
 
+use App\Project;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-
-use App\Project;
 
 class ProjectTableSeeder extends Seeder
 {
@@ -17,7 +15,7 @@ class ProjectTableSeeder extends Seeder
             'hash'        => Str::random(60),
             'repository'  => 'git@git.rebelinblue.com:laravel/deployer.git',
             'url'         => 'http://deploy.app',
-            'group_id'    => 1,
+            'group_id'    => 2,
             'private_key' => '-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAmrMjtajVvmd99T8xwUNrIFbrzSmZ6VCM89hfm4Ut9atv29gG
 l2HFPJY7VtslXDJVL67w5EUMspy82tkAX7F03iaarSsbo6nC16UTfbfNTi44Snm0
@@ -51,7 +49,7 @@ i5vkNY4OZdOuEV9boFOFYa58WRNK7vthHkZJj++Amu3dZ6RHBlLQ
                              '6TdICaigeQX6n/Xgwm2rRkr0qNIZsd/IoyLYS6/CWUUJjX16qxXt1wwMiwwpRbZ2IULnZ0lI74QXjucD+Ow0OKw' .
                              'WwgLsN55VUGXVOlpX1GJ2p5mZ3H6YX0B deploy@deployer',
             'last_run'    => null,
-            'build_url'   => 'http://ci.rebelinblue.com/build-status/image/3?branch=master'
+            'build_url'   => 'http://ci.rebelinblue.com/build-status/image/3?branch=master',
         ]);
     }
 }

@@ -1,18 +1,18 @@
-<?php namespace App\Presenters;
+<?php
 
-use Lang;
+namespace App\Presenters;
+
 use App\Project;
-use App\Command;
-use Robbo\Presenter\Presenter;
+use Lang;
 
 /**
- * The view presenter for a project class
+ * The view presenter for a project class.
  */
-class ProjectPresenter extends Presenter
+class ProjectPresenter extends CommandPresenter
 {
     /**
      * Returns the build status needed by CCTray
-     * These strings can not be translated
+     * These strings can not be translated.
      *
      * @return string
      */
@@ -30,7 +30,7 @@ class ProjectPresenter extends Presenter
     }
 
     /**
-     * Gets the translated project status string
+     * Gets the translated project status string.
      *
      * @return string
      */
@@ -50,7 +50,7 @@ class ProjectPresenter extends Presenter
     }
 
     /**
-     * Gets the CSS icon class for the project status
+     * Gets the CSS icon class for the project status.
      *
      * @return string
      */
@@ -59,10 +59,6 @@ class ProjectPresenter extends Presenter
         if ($this->status === Project::FINISHED) {
             return 'check';
         } elseif ($this->status === Project::DEPLOYING) {
-            // if (!$rotate) {
-            //     return 'spinner';
-            // }
-
             return 'spinner fa-pulse';
         } elseif ($this->status === Project::FAILED) {
             return 'warning';
@@ -74,7 +70,7 @@ class ProjectPresenter extends Presenter
     }
 
     /**
-     * Gets the CSS class for the project status
+     * Gets the CSS class for the project status.
      *
      * @return string
      */
@@ -94,113 +90,70 @@ class ProjectPresenter extends Presenter
     }
 
     /**
-     * Gets the readable list of before clone commands
+     * Show the application status.
      *
      * @return string
-     * @see self::commandNames()
      */
-    public function presentBeforeClone()
+    public function presentAppStatus()
     {
-        return $this->commandNames(Command::BEFORE_CLONE);
-    }
+        $status = $this->applicationCheckUrlStatus();
 
-    /**
-     * Gets the readable list of after clone commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentAfterClone()
-    {
-        return $this->commandNames(Command::AFTER_CLONE);
-    }
-
-    /**
-     * Gets the readable list of before install commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentBeforeInstall()
-    {
-        return $this->commandNames(Command::BEFORE_INSTALL);
-    }
-
-    /**
-     * Gets the readable list of after install commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentAfterInstall()
-    {
-        return $this->commandNames(Command::AFTER_INSTALL);
-    }
-
-    /**
-     * Gets the readable list of before activate commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentBeforeActivate()
-    {
-        return $this->commandNames(Command::BEFORE_ACTIVATE);
-    }
-
-    /**
-     * Gets the readable list of after activate commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentAfterActivate()
-    {
-        return $this->commandNames(Command::AFTER_ACTIVATE);
-    }
-
-    /**
-     * Gets the readable list of before purge commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentBeforePurge()
-    {
-        return $this->commandNames(Command::BEFORE_PURGE);
-    }
-
-    /**
-     * Gets the readable list of after purge commands
-     *
-     * @return string
-     * @see self::commandNames()
-     */
-    public function presentAfterPurge()
-    {
-        return $this->commandNames(Command::AFTER_PURGE);
-    }
-
-    /**
-     * Gets the readable list of commands
-     *
-     * @param int $stage
-     * @return string
-     */
-    private function commandNames($stage)
-    {
-        $commands = [];
-
-        foreach ($this->object->commands as $command) {
-            if ($command->step === $stage) {
-                $commands[] = $command->name;
-            }
+        if ($status['length'] === 0) {
+            return Lang::get('app.not_applicable');
         }
 
-        if (count($commands)) {
-            return implode(', ', $commands);
+        return ($status['length'] - $status['missed']) . ' / ' . $status['length'];
+    }
+
+    /**
+     * Show the application status css.
+     *
+     * @return string
+     */
+    public function presentAppStatusCss()
+    {
+        $status = $this->applicationCheckUrlStatus();
+
+        if ($status['length'] === 0) {
+            return 'warning';
+        } elseif ($status['missed']) {
+            return 'danger';
         }
 
-        return Lang::get('app.none');
+        return 'success';
+    }
+
+    /**
+     * Show heartbeat status count.
+     *
+     * @return string
+     */
+    public function presentHeartBeatStatus()
+    {
+        $status = $this->heartbeatsStatus();
+
+        if ($status['length'] === 0) {
+            return Lang::get('app.not_applicable');
+        }
+
+        return ($status['length'] - $status['missed']) . ' / ' . $status['length'];
+    }
+
+    /**
+     * The application heartbeat status css.
+     *
+     * @return string
+     */
+    public function presentHeartBeatStatusCss()
+    {
+        $status = $this->heartbeatsStatus();
+
+        if ($status['length'] === 0) {
+            return 'warning';
+        } elseif ($status['missed']) {
+            return 'danger';
+        }
+
+        return 'success';
     }
 }

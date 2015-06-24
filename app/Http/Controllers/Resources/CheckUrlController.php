@@ -1,23 +1,42 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use App\CheckUrl;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests\StoreCheckUrlRequest;
+use App\Repositories\Contracts\CheckUrlRepositoryInterface;
 
 /**
- * Controller for managing URLs
- * TODO: Change create/update to queue a check of the URL
+ * Controller for managing URLs.
  */
 class CheckUrlController extends ResourceController
 {
     /**
-     * Store a newly created url in storage.
+     * The CheckURL repository.
      *
-     * @param StoreCheckUrlRequest $request
+     * @var CheckUrlRepositoryInterface
+     */
+    protected $repository;
+
+    /**
+     * Class constructor.
+     *
+     * @param  CheckUrlRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(CheckUrlRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Store a newly created URL in storage.
+     *
+     * @param  StoreCheckUrlRequest $request
      * @return Response
      */
     public function store(StoreCheckUrlRequest $request)
     {
-        return CheckUrl::create($request->only(
+        return $this->repository->create($request->only(
             'title',
             'url',
             'is_report',
@@ -27,36 +46,19 @@ class CheckUrlController extends ResourceController
     }
 
     /**
-     * Update the specified file in storage.
+     * Update the specified URL in storage.
      *
-     * @param CheckUrl $url
-     * @param StoreCheckUrlRequest $request
+     * @param  int                  $url_id
+     * @param  StoreCheckUrlRequest $request
      * @return Response
      */
-    public function update(CheckUrl $url, StoreCheckUrlRequest $request)
+    public function update($url_id, StoreCheckUrlRequest $request)
     {
-        $url->update($request->only(
+        return $this->repository->updateById($request->only(
             'title',
             'url',
             'is_report',
             'period'
-        ));
-
-        return $url;
-    }
-
-    /**
-     * Remove the specified url from storage.
-     *
-     * @param CheckUrl $url
-     * @return Response
-     */
-    public function destroy(CheckUrl $url)
-    {
-        $url->delete();
-
-        return [
-            'success' => true
-        ];
+        ), $url_id);
     }
 }

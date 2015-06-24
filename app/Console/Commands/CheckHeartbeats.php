@@ -1,24 +1,26 @@
-<?php namespace App\Console\Commands;
+<?php
 
-use Queue;
-use Carbon\Carbon;
+namespace App\Console\Commands;
+
 use App\Heartbeat;
-use App\Commands\Notify;
+use App\Jobs\Notify;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
- * Checks that any expected heartbeats have checked-in
+ * Checks that any expected heartbeats have checked-in.
  */
 class CheckHeartbeats extends Command
 {
+    use DispatchesJobs;
+
     /**
-     * The console command name.
+     * The name and signature of the console command.
      *
      * @var string
      */
-    protected $name = 'deployer:heartbeats';
+    protected $signature = 'deployer:heartbeats';
 
     /**
      * The console command description.
@@ -28,33 +30,47 @@ class CheckHeartbeats extends Command
     protected $description = 'Checks that any expected heartbeats have checked-in';
 
     /**
-     * Checks that heartbeats happened as expected
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
-        $heartbeats = Heartbeat::all();
+        Heartbeat::chunk(10, function ($heartbeats) {
+            foreach ($heartbeats as $heartbeat) {
+                $last_heard_from = $heartbeat->last_activity;
+                if (!$last_heard_from) {
+                    $last_heard_from = $heartbeat->created_at;
+                }
 
-        foreach ($heartbeats as $heartbeat) {
-            $last_heard_from = $heartbeat->last_activity;
-            if (!$last_heard_from) {
-                $last_heard_from = $heartbeat->created_at;
-            }
+                $missed = $heartbeat->missed + 1;
 
-            $missed = $heartbeat->missed + 1;
+                $next_time = $last_heard_from->addMinutes($heartbeat->interval * $missed);
 
-            $next_time = $last_heard_from->addMinutes($heartbeat->interval * $missed);
+                if (Carbon::now()->gt($next_time)) {
+                    $heartbeat->status = Heartbeat::MISSING;
+                    $heartbeat->missed = $missed;
+                    $heartbeat->save();
 
-            if (Carbon::now()->gt($next_time)) {
-                $heartbeat->status = Heartbeat::MISSING;
-                $heartbeat->missed = $missed;
-                $heartbeat->save();
-
-                foreach ($heartbeat->project->notifications as $notification) {
-                    Queue::pushOn('notify', new Notify($notification, $heartbeat->notificationPayload()));
+                    foreach ($heartbeat->project->notifications as $notification) {
+                        $this->dispatch(new Notify(
+                            $notification,
+                            $heartbeat->notificationPayload()
+                        ));
+                    }
                 }
             }
-        }
+
+        });
     }
 }

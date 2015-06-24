@@ -10,6 +10,7 @@ var app = app || {};
         $('.btn-danger', modal).hide();
         $('.callout-danger', modal).hide();
         $('.has-error', modal).removeClass('has-error');
+        $('.label-danger', modal).remove();
 
         if (button.hasClass('btn-edit')) {
             title = Lang.edit;
@@ -61,13 +62,18 @@ var app = app || {};
 
                 var errors = response.responseJSON;
 
+                $('.has-error', dialog).removeClass('has-error');
+                $('.label-danger', dialog).remove();
+
                 $('form input', dialog).each(function (index, element) {
                     element = $(element);
 
                     var name = element.attr('name');
 
                     if (typeof errors[name] !== 'undefined') {
-                        element.parent('div').addClass('has-error');
+                        var parent = element.parent('div');
+                        parent.addClass('has-error');
+                        parent.append($('<span>').attr('class', 'label label-danger').text(errors[name]));
                     }
                 });
 
@@ -80,7 +86,6 @@ var app = app || {};
 
     app.Group = Backbone.Model.extend({
         urlRoot: '/admin/groups',
-        poller: false,
         initialize: function() {
 
         }
@@ -102,7 +107,30 @@ var app = app || {};
 
             this.listenTo(app.Groups, 'add', this.addOne);
             this.listenTo(app.Groups, 'reset', this.addAll);
+            this.listenTo(app.Groups, 'remove', this.addAll);
             this.listenTo(app.Groups, 'all', this.render);
+
+            app.listener.on('group:App\\Events\\ModelChanged', function (data) {
+                $('#group_' + data.model.id).html(data.model.name);
+
+                var group = app.Groups.get(parseInt(data.model.id));
+
+                if (group) {
+                    group.set(data.model);
+                }
+            });
+
+            app.listener.on('group:App\\Events\\ModelCreated', function (data) {
+                app.Groups.add(data.model);
+            });
+
+            app.listener.on('group:App\\Events\\ModelTrashed', function (data) {
+                var group = app.Groups.get(parseInt(data.model.id));
+
+                if (group) {
+                    app.Groups.remove(group);
+                }
+            });
         },
         addOne: function (group) {
 

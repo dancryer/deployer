@@ -1,22 +1,35 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use App\SharedFile;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests\StoreSharedFileRequest;
+use App\Repositories\Contracts\SharedFileRepositoryInterface;
 
 /**
- * Controller for managing files
+ * Controller for managing files.
  */
 class SharedFilesController extends ResourceController
 {
     /**
+     * Class constructor.
+     *
+     * @param  SharedFileRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(SharedFileRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
      * Store a newly created file in storage.
      *
-     * @param StoreSharedFileRequest $request
+     * @param  StoreSharedFileRequest $request
      * @return Response
      */
     public function store(StoreSharedFileRequest $request)
     {
-        return SharedFile::create($request->only(
+        return $this->repository->create($request->only(
             'name',
             'file',
             'project_id'
@@ -26,32 +39,15 @@ class SharedFilesController extends ResourceController
     /**
      * Update the specified file in storage.
      *
-     * @param SharedFile $sharedFile
-     * @param StoreSharedFileRequest $request
+     * @param  int                    $file_id
+     * @param  StoreSharedFileRequest $request
      * @return Response
      */
-    public function update(SharedFile $file, StoreSharedFileRequest $request)
+    public function update($file_id, StoreSharedFileRequest $request)
     {
-        $file->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'file'
-        ));
-
-        return $file;
-    }
-
-    /**
-     * Remove the specified file from storage.
-     *
-     * @param SharedFile $sharedFile
-     * @return Response
-     */
-    public function destroy(SharedFile $file)
-    {
-        $file->delete();
-
-        return [
-            'success' => true
-        ];
+        ), $file_id);
     }
 }

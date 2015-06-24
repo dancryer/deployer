@@ -10,6 +10,7 @@ var app = app || {};
         $('.btn-danger', modal).hide();
         $('.callout-danger', modal).hide();
         $('.has-error', modal).removeClass('has-error');
+        $('.label-danger', modal).remove();
 
         if (button.hasClass('btn-edit')) {
             title = Lang.notifyEmails.edit;
@@ -44,8 +45,6 @@ var app = app || {};
                 icon.removeClass('fa-refresh fa-spin').addClass('fa-trash');
                 $('button.close', dialog).show();
                 dialog.find('input').removeAttr('disabled');
-
-                app.NotifyEmails.remove(file);
             },
             error: function() {
                 icon.removeClass('fa-refresh fa-spin').addClass('fa-trash');
@@ -96,13 +95,18 @@ var app = app || {};
 
                 var errors = response.responseJSON;
 
+                $('.has-error', dialog).removeClass('has-error');
+                $('.label-danger', dialog).remove();
+
                 $('form input', dialog).each(function (index, element) {
                     element = $(element);
 
                     var name = element.attr('name');
 
                     if (typeof errors[name] !== 'undefined') {
-                        element.parent('div').addClass('has-error');
+                        var parent = element.parent('div');
+                        parent.addClass('has-error');
+                        parent.append($('<span>').attr('class', 'label label-danger').text(errors[name]));
                     }
                 });
 
@@ -114,8 +118,7 @@ var app = app || {};
     });
 
     app.NotifyEmail = Backbone.Model.extend({
-        urlRoot: '/notify-email',
-        poller: false
+        urlRoot: '/notify-email'
     });
 
     var NotifyEmails = Backbone.Collection.extend({
@@ -137,7 +140,30 @@ var app = app || {};
 
             this.listenTo(app.NotifyEmails, 'add', this.addOne);
             this.listenTo(app.NotifyEmails, 'reset', this.addAll);
+            this.listenTo(app.NotifyEmails, 'remove', this.addAll);
             this.listenTo(app.NotifyEmails, 'all', this.render);
+
+            app.listener.on('notifyemail:App\\Events\\ModelChanged', function (data) {
+                var email = app.NotifyEmails.get(parseInt(data.model.id));
+
+                if (server) {
+                    email.set(data.model);
+                }
+            });
+
+            app.listener.on('notifyemail:App\\Events\\ModelCreated', function (data) {
+                if (parseInt(data.model.project_id) === parseInt(app.project_id)) {
+                    app.NotifyEmails.add(data.model);
+                }
+            });
+
+            app.listener.on('notifyemail:App\\Events\\ModelTrashed', function (data) {
+                var email = app.NotifyEmails.get(parseInt(data.model.id));
+
+                if (email) {
+                    app.NotifyEmails.remove(email);
+                }
+            });
         },
         render: function () {
             if (app.NotifyEmails.length) {

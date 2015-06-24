@@ -1,19 +1,21 @@
-<?php namespace App\Repositories;
+<?php
+
+namespace App\Repositories;
 
 /**
- * Abstract class for eloquent repositories
+ * Abstract class for eloquent repositories.
  */
 abstract class EloquentRepository
 {
     /**
-     * An instance of the model
+     * An instance of the model.
      *
      * @var Model
      */
     protected $model;
 
     /**
-     * Get's all records from the model
+     * Get's all records from the model.
      *
      * @return Collection
      */
@@ -23,10 +25,10 @@ abstract class EloquentRepository
     }
 
     /**
-     * Get instance by it's ID
+     * Get's an item from the repository.
      *
-     * @param int $model_id
-     * @return Model
+     * @param  int   $model_id
+     * @return model
      */
     public function getById($model_id)
     {
@@ -34,9 +36,9 @@ abstract class EloquentRepository
     }
 
     /**
-     * Creates a new instance of the model
+     * Creates a new instance of the model.
      *
-     * @param array $fields
+     * @param  array $fields
      * @return Model
      */
     public function create(array $fields)
@@ -45,15 +47,15 @@ abstract class EloquentRepository
     }
 
     /**
-     * Updates an instance by it's ID
+     * Updates an instance by it's ID.
      *
-     * @param array $fields
-     * @param int $model_id
+     * @param  array $fields
+     * @param  int   $model_id
      * @return Model
      */
     public function updateById(array $fields, $model_id)
     {
-        $model = $this->model->findOrFail($model_id);
+        $model = $this->getById($model_id);
 
         $model->update($fields);
 
@@ -61,15 +63,17 @@ abstract class EloquentRepository
     }
 
     /**
-     * Delete an instance by it's ID
+     * Delete an instance by it's ID.
      *
-     * @param int $model_id
+     * @param  int   $model_id
      * @return Model
      */
-    public function delete($model_id)
+    public function deleteById($model_id)
     {
-        $model = $this->model->findOrFail($model_id);
+        $model = $this->getById($model_id);
 
-        return $model->delete();
+        $model->delete();
+
+        return;
     }
 }

@@ -1,44 +1,90 @@
-<?php namespace App\Repositories;
+<?php
 
-use App\Project;
+namespace App\Repositories;
+
 use App\Deployment;
-use Carbon\Carbon;
+use App\Jobs\QueueDeployment;
 use App\Repositories\Contracts\DeploymentRepositoryInterface;
+use App\Repositories\EloquentRepository;
+use Carbon\Carbon;
+use Illuminate\Foundation\Bus\DispatchesJobs;
 
 /**
- * The deployment repository
+ * The deployment repository.
  */
-class EloquentDeploymentRepository implements DeploymentRepositoryInterface
+class EloquentDeploymentRepository extends EloquentRepository implements DeploymentRepositoryInterface
 {
+    use DispatchesJobs;
+
     /**
-     * Gets the latest deployments for a project
+     * Class constructor.
      *
-     * @param Project $project
-     * @return array
+     * @param  Deployment                   $model
+     * @return EloquentDeploymentRepository
      */
-    public function getLatest(Project $project)
+    public function __construct(Deployment $model)
     {
-        return Deployment::where('project_id', $project->id)
-                         ->orderBy('started_at', 'DESC')
-                         ->paginate($project->builds_to_keep);
+        $this->model = $model;
     }
 
     /**
-     * Gets the latest deployments for all projects
+     * Creates a new instance of the server.
+     *
+     * @param  array $fields
+     * @return Model
+     */
+    public function create(array $fields)
+    {
+        $optional = [];
+        if (array_key_exists('optional', $fields)) {
+            $optional = $fields['optional'];
+            unset($fields['optional']);
+        }
+
+        $deployment = $this->model->create($fields);
+
+        $this->dispatch(new QueueDeployment(
+            $deployment->project,
+            $deployment,
+            $optional
+        ));
+
+        return $deployment;
+    }
+
+    /**
+     * Gets the latest deployments for a project.
+     *
+     * @param  int   $project
+     * @param  int   $paginate
+     * @return array
+     */
+    public function getLatest($project_id, $paginate = 15)
+    {
+        return $this->model->where('project_id', $project_id)
+                           ->with('user', 'project')
+                           ->orderBy('started_at', 'DESC')
+                           ->paginate($paginate);
+    }
+
+    /**
+     * Gets the latest deployments for all projects.
      *
      * @return array
      */
     public function getTimeline()
     {
         $raw_sql = 'project_id IN (SELECT id FROM projects WHERE deleted_at IS NULL)';
-        return Deployment::whereRaw($raw_sql) // FIXME: Surely there is a nicer way to do this?
-                         ->take(15)
-                         ->orderBy('started_at', 'DESC')
-                         ->get();
+
+        return $this->model->whereRaw($raw_sql)
+                           ->with('project')
+                           ->take(15)
+                           ->orderBy('started_at', 'DESC')
+                           ->get();
     }
 
     /**
-     * Gets pending deployments
+     * Gets pending deployments.
      *
      * @return array
      */
@@ -48,7 +94,7 @@ class EloquentDeploymentRepository implements DeploymentRepositoryInterface
     }
 
     /**
-     * Gets running deployments
+     * Gets running deployments.
      *
      * @return array
      */
@@ -58,62 +104,63 @@ class EloquentDeploymentRepository implements DeploymentRepositoryInterface
     }
 
     /**
-     * Gets the number of times a project has been deployed today
+     * Gets the number of times a project has been deployed today.
      *
-     * @param Project $project
+     * @param  int $project_id
      * @return int
      * @see DeploymentRepository::getBetweenDates()
      */
-    public function getTodayCount(Project $project)
+    public function getTodayCount($project_id)
     {
         $now = Carbon::now();
 
-        return $this->getBetweenDates($project, $now, $now);
+        return $this->getBetweenDates($project_id, $now, $now);
     }
 
     /**
-     * Gets the number of times a project has been deployed in the last week
+     * Gets the number of times a project has been deployed in the last week.
      *
-     * @param Project $project
+     * @param  int $project_id
      * @return int
      * @see DeploymentRepository::getBetweenDates()
      */
-    public function getLastWeekCount(Project $project)
+    public function getLastWeekCount($project_id)
     {
         $lastWeek  = Carbon::now()->subWeek();
-        $yesterday = Carbon::now()->yesterday(); // FIXME: Should this be today?
+        $yesterday = Carbon::now()->yesterday();
 
-        return $this->getBetweenDates($project, $lastWeek, $yesterday);
+        return $this->getBetweenDates($project_id, $lastWeek, $yesterday);
     }
 
     /**
-     * Gets the number of times a project has been deployed between the specified dates
+     * Gets the number of times a project has been deployed between the specified dates.
      *
-     * @param Project $project
-     * @param Carbon $startDate
-     * @param Carbon $endDate
+     * @param  int    $project_id
+     * @param  Carbon $startDate
+     * @param  Carbon $endDate
      * @return int
      */
-    private function getBetweenDates(Project $project, Carbon $startDate, Carbon $endDate)
+    private function getBetweenDates($project_id, Carbon $startDate, Carbon $endDate)
     {
-        return Deployment::where('project_id', $project->id)
-                         ->where('started_at', '>=', $startDate->format('Y-m-d') . ' 00:00:00')
-                         ->where('started_at', '<=', $endDate->format('Y-m-d') . ' 23:59:59')
-                         ->count();
+        return $this->model->where('project_id', $project_id)
+                           ->where('started_at', '>=', $startDate->format('Y-m-d') . ' 00:00:00')
+                           ->where('started_at', '<=', $endDate->format('Y-m-d') . ' 23:59:59')
+                           ->count();
     }
 
     /**
-     * Gets deployments with a supplied status
+     * Gets deployments with a supplied status.
      *
-     * @param int $status
+     * @param  int   $status
      * @return array
      */
-    public function getStatus($status)
+    private function getStatus($status)
     {
         $raw_sql = 'project_id IN (SELECT id FROM projects WHERE deleted_at IS NULL)';
-        return Deployment::whereRaw($raw_sql) // FIXME: Surely there is a nicer way to do this?
-                         ->where('status', $status)
-                         ->orderBy('started_at', 'DESC')
-                         ->get();
+
+        return $this->model->whereRaw($raw_sql)
+                           ->where('status', $status)
+                           ->orderBy('started_at', 'DESC')
+                           ->get();
     }
 }

@@ -1,67 +1,98 @@
-<?php namespace App\Http\Controllers;
+<?php
 
-use Lang;
-use Input;
-use App\Project;
-use App\Deployment;
-use App\ServerLog;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+namespace App\Http\Controllers;
+
+use App\Command;
 use App\Repositories\Contracts\DeploymentRepositoryInterface;
-use App\Commands\QueueDeployment;
+use App\Repositories\Contracts\ProjectRepositoryInterface;
+use App\ServerLog;
+use Input;
+use Lang;
 
 /**
- * The controller for showing the status of deployments
+ * The controller for showing the status of deployments.
  */
 class DeploymentController extends Controller
 {
     /**
-     * The details of an individual project
+     * The project repository.
      *
-     * @param Project $project
-     * @param DeploymentRepositoryInterface $deploymentRepository
+     * @var ProjectRepositoryInterface
+     */
+    private $projectRepository;
+
+    /**
+     * The deployment repository.
+     *
+     * @var deploymentRepository
+     */
+    private $deploymentRepository;
+
+    /**
+     * Class constructor.
+     *
+     * @param  ProjectRepositoryInterface    $projectRepository
+     * @param  DeploymentRepositoryInterface $projectRepository
+     * @return void
+     */
+    public function __construct(
+        ProjectRepositoryInterface $projectRepository,
+        DeploymentRepositoryInterface $deploymentRepository
+    ) {
+        $this->projectRepository    = $projectRepository;
+        $this->deploymentRepository = $deploymentRepository;
+    }
+
+    /**
+     * The details of an individual project.
+     *
+     * @param  int                           $project_id
+     * @param  DeploymentRepositoryInterface $deploymentRepository
      * @return View
      */
-    public function project(Project $project, DeploymentRepositoryInterface $deploymentRepository)
+    public function project($project_id)
     {
-        $optional = $project->commands->filter(function ($command) {
+        $project = $this->projectRepository->getById($project_id);
+
+        $optional = $project->commands->filter(function (Command $command) {
             return $command->optional;
         });
 
         return view('projects.details', [
             'title'         => $project->name,
-            'deployments'   => $deploymentRepository->getLatest($project),
-            'today'         => $deploymentRepository->getTodayCount($project),
-            'last_week'     => $deploymentRepository->getLastWeekCount($project),
+            'deployments'   => $this->deploymentRepository->getLatest($project_id, $project->builds_to_keep),
+            'today'         => $this->deploymentRepository->getTodayCount($project_id),
+            'last_week'     => $this->deploymentRepository->getLastWeekCount($project_id),
             'project'       => $project,
             'servers'       => $project->servers,
             'notifications' => $project->notifications,
             'notifyEmails'  => $project->notifyEmails,
             'heartbeats'    => $project->heartbeats,
-            'sharedFiles'   => $project->shareFiles,
+            'sharedFiles'   => $project->sharedFiles,
             'projectFiles'  => $project->projectFiles,
             'checkUrls'     => $project->checkUrls,
-            'optional'      => $optional
+            'optional'      => $optional,
+            'route'         => 'commands',
         ]);
     }
 
     /**
-     * Show the deployment details
+     * Show the deployment details.
      *
-     * @param Deployment $deployment
+     * @param  int      $deployment
      * @return Response
      */
-    public function show(Deployment $deployment)
+    public function show($deployment_id)
     {
+        $deployment = $this->deploymentRepository->getById($deployment_id);
+
         $output = [];
         foreach ($deployment->steps as $step) {
             foreach ($step->servers as $server) {
                 $server->server;
 
-                $server->runtime  = ($server->runtime() === false ? null : human_readable_duration($server->runtime()));
-                $server->output   = ((is_null($server->output) || !strlen($server->output)) ? null : '');
-                $server->script   = '';
-                $server->first    = (count($output) === 0); // FIXME: Let backbone.js take care of this
+                $server->runtime = (!$server->runtime() ? null : $server->getPresenter()->readable_runtime);
+                $server->output  = ((is_null($server->output) || !strlen($server->output)) ? null : '');
 
                 $output[] = $server;
             }
@@ -71,49 +102,61 @@ class DeploymentController extends Controller
 
         return view('deployment.details', [
             'breadcrumb' => [
-                ['url' => url('projects', $project->id), 'label' => $project->name]
+                ['url' => url('projects', $project->id), 'label' => $project->name],
             ],
             'title'      => Lang::get('deployments.details'),
             'project'    => $project,
             'deployment' => $deployment,
-            'output'     => $output
+            'output'     => json_encode($output), // PresentableInterface does not correctly json encode the models
         ]);
     }
 
     /**
-     * Adds a deployment for the specified project to the queue
+     * Adds a deployment for the specified project to the queue.
      *
-     * @param Project $project
+     * @param  int      $project
      * @return Response
-     * TODO: Don't allow this to run if there is already a pending deploy or no servers
      */
-    public function deploy(Project $project)
+    public function deploy($project_id)
     {
-        $deployment = new Deployment;
-        $deployment->reason = Input::get('reason');
+        $project = $this->projectRepository->getById($project_id);
+
+        if ($project->servers->where('deploy_code', true)->count() === 0) {
+            return redirect()->url('projects', $project->id);
+        }
+
+        $data = [
+            'reason'     => Input::get('reason'),
+            'project_id' => $project->id,
+            'branch'     => $project->branch,
+            'optional'   => [],
+        ];
 
         if (Input::has('source') && Input::has('source_' . Input::get('source'))) {
-            $deployment->branch = Input::get('source_' . Input::get('source'));
+            $data['branch'] = Input::get('source_' . Input::get('source'));
         }
-
-        if (empty($deployment->branch)) {
-            $deployment->branch = $project->branch;
-        }
-
-        $optional = [];
 
         if (Input::has('optional')) {
-            $optional = Input::get('optional');
+            $data['optional'] = Input::get('optional');
         }
 
-        $this->dispatch(new QueueDeployment(
-            $project,
-            $deployment,
-            $optional
-        ));
+        $deployment = $this->deploymentRepository->create($data);
 
         return redirect()->route('deployment', [
-            'id' => $deployment->id
+            'id' => $deployment->id,
         ]);
+    }
+
+    /**
+     * Gets the log output of a particular deployment step.
+     *
+     * @param  ServerLog $log
+     * @return ServerLog
+     */
+    public function log(ServerLog $log)
+    {
+        $log->runtime = (!$log->runtime() ? null : $log->getPresenter()->readable_runtime);
+
+        return $log;
     }
 }

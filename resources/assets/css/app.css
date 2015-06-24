@@ -51,6 +51,10 @@ body.dragging * {
     cursor: pointer;
 }
 
+#pending_menu, #deploying_menu {
+    display: none;
+}
+
 /* Make sure there is always a space between the icon and the label as HTMLMin removes it */
 span.label i.fa {
     margin-right: 2px;
@@ -72,9 +76,17 @@ input[type=text].deployment-source {
     overflow-y: scroll;
 }
 
+#repository_error {
+    display: none;
+}
+
 #deploying_menu li a p,
 #deploying_menu li a h4,
 #pending_menu li a p,
 #pending_menu li a h4 {
     margin-left: 0;
+}
+
+.project-status .nav-tabs-custom > .nav-tabs > li {
+    margin-right: 0;
 }

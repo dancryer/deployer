@@ -1,9 +1,11 @@
-<?php namespace App\Http\Requests;
+<?php
+
+namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
 
 /**
- * Request for validating heartbeats
+ * Request for validating heartbeats.
  */
 class StoreHeartbeatRequest extends Request
 {
@@ -17,7 +19,7 @@ class StoreHeartbeatRequest extends Request
         return [
             'name'       => 'required|max:255',
             'interval'   => 'required|integer',
-            'project_id' => 'required|integer|exists:projects,id'
+            'project_id' => 'required|integer|exists:projects,id',
         ];
     }
 }

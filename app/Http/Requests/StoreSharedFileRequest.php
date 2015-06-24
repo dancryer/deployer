@@ -1,9 +1,11 @@
-<?php namespace App\Http\Requests;
+<?php
+
+namespace App\Http\Requests;
 
 use App\Http\Requests\Request;
 
 /**
- * Request for validating servers
+ * Request for validating servers.
  */
 class StoreSharedFileRequest extends Request
 {
@@ -17,7 +19,7 @@ class StoreSharedFileRequest extends Request
         return [
             'name'       => 'required|max:255',
             'file'       => 'required',
-            'project_id' => 'required|integer|exists:projects,id'
+            'project_id' => 'required|integer|exists:projects,id',
         ];
     }
 }

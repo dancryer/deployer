@@ -1,17 +1,21 @@
-<?php namespace App\Presenters;
+<?php
 
-use Lang;
+namespace App\Presenters;
+
 use App\Deployment;
+use Lang;
 use Robbo\Presenter\Presenter;
 
 /**
- * The view presenter for a project class
+ * The view presenter for a project class.
  */
 class DeploymentPresenter extends Presenter
 {
+    use RuntimePresenter;
+
     /**
      * Returns the build status needed by CCTray
-     * These strings can not be translated
+     * These strings can not be translated.
      *
      * @return string
      */
@@ -27,7 +31,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the translated deployment status string
+     * Gets the translated deployment status string.
      *
      * @return string
      */
@@ -45,7 +49,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the CSS icon class for the deployment status
+     * Gets the CSS icon class for the deployment status.
      *
      * @return string
      */
@@ -63,7 +67,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the CSS class for the deployment status
+     * Gets the CSS class for the deployment status.
      *
      * @return string
      */
@@ -81,7 +85,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the CSS class for the deployment status for the timeline
+     * Gets the CSS class for the deployment status for the timeline.
      *
      * @return string
      */
@@ -99,7 +103,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the name of the committer, or the "Loading" string if it has not yet been determined
+     * Gets the name of the committer, or the "Loading" string if it has not yet been determined.
      *
      * @return string
      */
@@ -113,7 +117,7 @@ class DeploymentPresenter extends Presenter
     }
 
     /**
-     * Gets the short commit hash, or the "Loading" string if it has not yet been determined
+     * Gets the short commit hash, or the "Loading" string if it has not yet been determined.
      *
      * @return string
      */

@@ -1,11 +1,12 @@
-<?php namespace App\Http\Requests;
+<?php
 
-use Input;
+namespace App\Http\Requests;
+
 use App\Command;
 use App\Http\Requests\Request;
 
 /**
- * Request for validating commands
+ * Request for validating commands.
  */
 class StoreCommandRequest extends Request
 {
@@ -20,8 +21,9 @@ class StoreCommandRequest extends Request
             'name'       => 'required|max:255',
             'user'       => 'required|max:255',
             'script'     => 'required',
+            'optional'   => 'boolean',
             'step'       => 'required|integer|min:' . Command::BEFORE_CLONE . '|max:' . Command::AFTER_PURGE,
-            'project_id' => 'required|integer|exists:projects,id'
+            'project_id' => 'required|integer|exists:projects,id',
         ];
 
         // On edit we don't require the step or the project_id

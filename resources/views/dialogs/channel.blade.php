@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                <h4 class="modal-title"><i class="fa fa-bullhorn"></i> <span>{{ Lang::get('notifications.create') }}</span></h4>
+                <h4 class="modal-title"><i class="fa fa-slack"></i> <span>{{ Lang::get('notifications.create') }}</span></h4>
             </div>
             <form role="form">
                 <input type="hidden" id="notification_id" name="id" />
@@ -29,7 +29,16 @@
                     </div>
                     <div class="form-group">
                         <label for="notification_webhook">{{ Lang::get('notifications.webhook') }}</label>
-                        <input type="text" class="form-control" id="notification_webhook" name="webhook" placeholder="http://slack.com" />
+                        <input type="text" class="form-control" id="notification_webhook" name="webhook" placeholder="https://hooks.slack.com/services/" />
+                    </div>
+                    <div class="form-group">
+                        <label>{{ Lang::get('notifications.failure_only') }}</label>
+                        <div class="checkbox">
+                            <label for="notification_failure_only">
+                                <input type="checkbox" value="1" name="failure_only" id="notification_failure_only" /> 
+                                {{ Lang::get('notifications.failure_description') }}
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -1,10 +1,11 @@
-<?php namespace App\Http\Requests;
+<?php
 
-use Input;
+namespace App\Http\Requests;
+
 use App\Http\Requests\Request;
 
 /**
- * Request for validating groups
+ * Request for validating groups.
  */
 class StoreGroupRequest extends Request
 {
@@ -16,7 +17,7 @@ class StoreGroupRequest extends Request
     public function rules()
     {
         $rules = [
-            'name' => 'required|max:255|unique:groups,name'
+            'name' => 'required|max:255|unique:groups,name',
         ];
 
         // On edit add the group ID to the rules

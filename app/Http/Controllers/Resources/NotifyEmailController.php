@@ -1,22 +1,35 @@
-<?php namespace App\Http\Controllers\Resources;
+<?php
 
-use App\NotifyEmail;
+namespace App\Http\Controllers\Resources;
+
 use App\Http\Requests\StoreNotifyEmailRequest;
+use App\Repositories\Contracts\NotifyEmailRepositoryInterface;
 
 /**
- * Controller for managing NotifyEmails
+ * Controller for managing NotifyEmails.
  */
 class NotifyEmailController extends ResourceController
 {
     /**
-     * Store a newly created notify_email in storage.
+     * Class constructor.
      *
-     * @param StoreNotifyEmailRequest $request
+     * @param  NotifyEmailRepositoryInterface $repository
+     * @return void
+     */
+    public function __construct(NotifyEmailRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Store a newly created NotifyEmail in storage.
+     *
+     * @param  StoreNotifyEmailRequest $request
      * @return Response
      */
     public function store(StoreNotifyEmailRequest $request)
     {
-        return NotifyEmail::create($request->only(
+        return $this->repository->create($request->only(
             'name',
             'email',
             'project_id'
@@ -24,34 +37,17 @@ class NotifyEmailController extends ResourceController
     }
 
     /**
-     * Update the specified notify_email in storage.
+     * Update the specified NotifyEmail in storage.
      *
-     * @param NotifyEmail $notify_email
-     * @param StoreNotifyEmailRequest $request
+     * @param  int                     $email_id
+     * @param  StoreNotifyEmailRequest $request
      * @return Response
      */
-    public function update(NotifyEmail $notify_email, StoreNotifyEmailRequest $request)
+    public function update($email_id, StoreNotifyEmailRequest $request)
     {
-        $notify_email->update($request->only(
+        return $this->repository->updateById($request->only(
             'name',
             'email'
-        ));
-
-        return $notify_email;
-    }
-
-    /**
-     * Remove the specified NotifyEmail from storage.
-     *
-     * @param NotifyEmail $notify_email
-     * @return Response
-     */
-    public function destroy(NotifyEmail $notify_email)
-    {
-        $notify_email->delete();
-
-        return [
-            'success' => true
-        ];
+        ), $email_id);
     }
 }

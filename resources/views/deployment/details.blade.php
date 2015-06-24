@@ -5,6 +5,13 @@
         <p><strong>{{ Lang::get('deployments.reason') }}</strong>: {{ $deployment->reason }}</p>
     @endif
     <div class="row">
+        <div class="col-xs-12" id="{{ $deployment->repo_failure ? '' : 'repository_error' }}">
+            <div class="callout callout-danger">
+                <h4><i class="icon fa fa-ban"></i> {{ Lang::get('deployments.repo_failure_head') }}</h4>
+                <p>{{ Lang::get('deployments.repo_failure') }}</p>
+            </div>
+        </div>
+
         @foreach($deployment->steps as $step)
         <div class="col-xs-12">
             <div class="box deploy-step">
@@ -55,8 +62,8 @@
             <% } %>
         </td>
         <td width="10%">
-         <% if (total_time) { %>
-                <%- total_time %>
+         <% if (runtime !== null) { %>
+                <%- runtime %>
             <% } else { %>
                 {{ Lang::get('app.not_applicable') }}
             <% } %>
@@ -84,6 +91,8 @@
 @section('javascript')
     <script type="text/javascript">
         new app.DeploymentView();
-        app.Deployment.add({!! json_encode($output) !!});
+        app.Deployment.add({!! $output !!});
+
+        app.project_id = {{ $deployment->project_id }};
     </script>
 @stop
