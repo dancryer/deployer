@@ -2,27 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Resources\ResourceController as Controller;
-use App\Http\Requests\StoreTemplateRequest;
-use App\Repositories\Contracts\TemplateRepositoryInterface;
+use App\Http\Controllers\API\TemplateController as TemplateResourceController;
 use Lang;
 
 /**
  * Controller for managing deployment template.
  */
-class TemplateController extends Controller
+class TemplateController extends TemplateResourceController
 {
-    /**
-     * Class constructor.
-     *
-     * @param  TemplateRepositoryInterface $repository
-     * @return void
-     */
-    public function __construct(TemplateRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
-
     /**
      * Shows all templates.
      *
@@ -30,7 +17,7 @@ class TemplateController extends Controller
      */
     public function index()
     {
-        $templates = $this->repository->getAll();
+        $templates = parent::index();
 
         return view('admin.templates.listing', [
             'title'     => Lang::get('templates.manage'),
@@ -46,7 +33,7 @@ class TemplateController extends Controller
      */
     public function show($template_id)
     {
-        $template = $this->repository->getById($template_id);
+        $template = parent::show($template_id);
 
         return view('admin.templates.details', [
             'breadcrumb' => [
@@ -58,32 +45,5 @@ class TemplateController extends Controller
             'project'       => $template,
             'route'         => 'template.commands',
         ]);
-    }
-
-    /**
-     * Store a newly created template in storage.
-     *
-     * @param  StoreTemplateRequest $request
-     * @return Response
-     */
-    public function store(StoreTemplateRequest $request)
-    {
-        return $this->repository->create($request->only(
-            'name'
-        ));
-    }
-
-    /**
-     * Update the specified template in storage.
-     *
-     * @param  int                  $template_id
-     * @param  StoreTemplateRequest $request
-     * @return Response
-     */
-    public function update($template_id, StoreTemplateRequest $request)
-    {
-        return $this->repository->updateById($request->only(
-            'name'
-        ), $template_id);
     }
 }
