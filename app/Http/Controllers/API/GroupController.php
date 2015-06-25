@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreGroupRequest;
 use App\Repositories\Contracts\GroupRepositoryInterface;
 
 /**
  * The controller for managing groups.
  */
-class GroupController extends Controller
+class GroupController extends ResourceController
 {
     /**
      * Class constructor.

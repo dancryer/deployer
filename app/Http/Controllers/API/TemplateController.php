@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreTemplateRequest;
 use App\Repositories\Contracts\TemplateRepositoryInterface;
 
 /**
  * The controller for managing templates.
  */
-class TemplateController extends Controller
+class TemplateController extends ResourceController
 {
     /**
      * Class constructor.

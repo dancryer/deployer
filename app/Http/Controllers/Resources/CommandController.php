@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Resources;
 
 use App\Command;
+use App\Http\Controllers\API\ResourceController;
 use App\Http\Requests\StoreCommandRequest;
 use App\Repositories\Contracts\CommandRepositoryInterface;
 use App\Repositories\Contracts\ProjectRepositoryInterface;

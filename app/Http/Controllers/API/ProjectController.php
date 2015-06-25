@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
 
 /**
  * The controller for managing projects.
  */
-class ProjectController extends Controller
+class ProjectController extends ResourceController
 {
     /**
      * Class constructor.

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Repositories\Contracts\UserRepositoryInterface;
 
 /**
  * The controller for managing users.
  */
-class UserController extends Controller
+class UserController extends ResourceController
 {
     /**
      * Class constructor.

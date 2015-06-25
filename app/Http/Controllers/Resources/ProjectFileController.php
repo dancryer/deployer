@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Resources;
 
+use App\Http\Controllers\API\ResourceController;
 use App\Http\Requests\StoreProjectFileRequest;
 use App\Repositories\Contracts\ProjectFileRepositoryInterface;
 
