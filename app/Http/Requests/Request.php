@@ -17,6 +17,10 @@ abstract class Request extends FormRequest
      */
     public function authorize()
     {
+        if ($this->is('api/*')) {
+            return true; // FIXME: This will need changing
+        }
+
         return Auth::check();
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\API\GroupController as GroupAPIController;
+use App\Http\Controllers\API\GroupController as GroupResourceController;
 use Lang;
 
 /**
  * Group management controller.
  */
-class GroupController extends GroupAPIController
+class GroupController extends GroupResourceController
 {
     /**
      * Display a listing of the groups.

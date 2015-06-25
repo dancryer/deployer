@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\API\ProjectController as ProjectAPIController;
+use App\Http\Controllers\API\ProjectController as ProjectResourceController;
 use App\Repositories\Contracts\TemplateRepositoryInterface;
 use Lang;
 
 /**
  * The controller for managging projects.
  */
-class ProjectController extends ProjectAPIController
+class ProjectController extends ProjectResourceController
 {
     /**
      * Shows all projects.
