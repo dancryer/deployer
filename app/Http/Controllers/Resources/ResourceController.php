@@ -29,7 +29,7 @@ abstract class ResourceController extends Controller
     /**
      * Shows a specific instance of the model from the repository.
      *
-     * @param  int      $project_id
+     * @param  int      $model_id
      * @return Response
      */
     public function show($model_id)
