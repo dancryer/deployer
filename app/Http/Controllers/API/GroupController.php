@@ -49,4 +49,17 @@ class GroupController extends Controller
             'name'
         ), $group_id);
     }
+
+    /**
+     * Show the projects in the specified group
+     * 
+     * @param int $group_id
+     * @return Response
+     */
+    public function projects($group_id)
+    {
+        $group = parent::show($group_id);
+
+        return $group->projects;
+    }
 }

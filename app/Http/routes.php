@@ -89,6 +89,10 @@ Route::group(['prefix' => 'api', 'namespace' => 'API'], function () {
     Route::resource('groups', 'GroupController', $actions);
     Route::resource('templates', 'TemplateController', $actions);
     Route::resource('users', 'UserController', $actions);
+
+    Route::get('groups/{group}/projects', 'GroupController@projects');
+
+    Route::resource('projects/{project}/servers', 'ServerController', $actions);
 });
 
 // Webhooks
