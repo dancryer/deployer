@@ -8,7 +8,7 @@ use App\Http\Requests\StoreTemplateRequest;
 use App\Repositories\Contracts\TemplateRepositoryInterface;
 
 /**
- * The controller for managing groups.
+ * The controller for managing templates.
  */
 class TemplateController extends Controller
 {
