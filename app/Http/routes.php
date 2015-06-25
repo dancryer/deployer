@@ -66,20 +66,16 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
+        $actions = [
+            'only' => ['index', 'store', 'update', 'destroy'],
+        ];
+
+        Route::resource('projects', 'ProjectController', $actions);
+        Route::resource('users', 'UserController', $actions);
+        Route::resource('groups', 'GroupController', $actions); // FIXME: Add destroy to groups
+
         Route::resource('templates', 'TemplateController', [
             'only' => ['index', 'store', 'update', 'destroy', 'show'],
-        ]);
-
-        Route::resource('projects', 'ProjectController', [
-            'only' => ['index', 'store', 'update', 'destroy'],
-        ]);
-
-        Route::resource('users', 'UserController', [
-            'only' => ['index', 'store', 'update', 'destroy'],
-        ]);
-
-        Route::resource('groups', 'GroupController', [
-            'only' => ['index', 'store', 'update'],
         ]);
     });
 });
@@ -90,9 +86,7 @@ Route::group(['prefix' => 'api', 'namespace' => 'API'], function () {
     ];
 
     Route::resource('projects', 'ProjectController', $actions);
-    Route::resource('groups', 'GroupController', [
-        'only' => ['index', 'show', 'store', 'update'],
-    ]);
+    Route::resource('groups', 'GroupController', $actions);
     Route::resource('templates', 'TemplateController', $actions);
     Route::resource('users', 'UserController', $actions);
 });
