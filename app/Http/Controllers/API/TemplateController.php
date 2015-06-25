@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Group;
 use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreTemplateRequest;
 use App\Repositories\Contracts\TemplateRepositoryInterface;

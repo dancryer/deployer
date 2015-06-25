@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Resources\ResourceController as Controller;
 use App\Http\Requests\StoreProjectRequest;
-use App\Project;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
 
 /**
