@@ -145,6 +145,7 @@ return [
         Creativeorange\Gravatar\GravatarServiceProvider::class,
         Robbo\Presenter\PresenterServiceProvider::class,
         Bugsnag\BugsnagLaravel\BugsnagLaravelServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
         
         /*
          * Application Service Providers...
@@ -205,6 +206,7 @@ return [
         'Debugbar'  => Barryvdh\Debugbar\Facade::class,
         'Gravatar'  => Creativeorange\Gravatar\Facades\Gravatar::class,
         'Bugsnag'   => Bugsnag\BugsnagLaravel\BugsnagFacade::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
 
     ],
 

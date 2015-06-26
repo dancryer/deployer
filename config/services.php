@@ -34,4 +34,16 @@ return [
         'secret' => '',
     ],
 
+    'github' => [
+        'client_id' => '4bbf037827ace2e23b1f',
+        'client_secret' => 'beace660c4c6d4c0ecefac133c7997364d07228c',
+        'redirect' => $_ENV['APP_URL'] . '/admin/integrations/callback/github',
+    ],
+
+    'bitbucket' => [
+        'client_id' => 'gS2JYF5M69zxgRu8G3',
+        'client_secret' => 'BeQaWZPyYPwBQyRMHTSNsUFGrPPxaAZR',
+        'redirect' => $_ENV['APP_URL'] . '/admin/integrations/callback/bitbucket',
+    ],
+
 ];
