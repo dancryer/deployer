@@ -35,15 +35,15 @@ return [
     ],
 
     'github' => [
-        'client_id' => '4bbf037827ace2e23b1f',
-        'client_secret' => 'beace660c4c6d4c0ecefac133c7997364d07228c',
-        'redirect' => $_ENV['APP_URL'] . '/admin/integrations/callback/github',
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/integrations/callback/github',
     ],
 
     'bitbucket' => [
-        'client_id' => 'gS2JYF5M69zxgRu8G3',
-        'client_secret' => 'BeQaWZPyYPwBQyRMHTSNsUFGrPPxaAZR',
-        'redirect' => $_ENV['APP_URL'] . '/admin/integrations/callback/bitbucket',
+        'client_id' => env('BITBUCKET_CLIENT_ID'),
+        'client_secret' => env('BITBUCKET_CLIENT_SECRET'),
+        'redirect' => env('APP_URL') . '/admin/integrations/callback/bitbucket',
     ],
 
 ];

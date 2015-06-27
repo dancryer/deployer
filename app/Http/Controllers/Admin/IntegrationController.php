@@ -7,6 +7,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Socialite;
 
+use CommerceGuys\Guzzle\Oauth2\GrantType\RefreshToken;
+use CommerceGuys\Guzzle\Oauth2\GrantType\PasswordCredentials;
+use CommerceGuys\Guzzle\Oauth2\Oauth2Subscriber;
+
 
 class IntegrationController extends Controller
 {
@@ -39,6 +43,32 @@ class IntegrationController extends Controller
             // OAuth Two Providers
             $token = $user->token;
 
+            $oauth2client = new Client(['base_url' => 'https://api.github.com/']);
+
+            $config = [
+                'username' => env('GITHUB_CLIENT_ID'),
+                'password' => env('GITHUB_CLIENT_SECRET'),
+                'client_id' => 'deployer',
+                'scope' => 'user',
+            ];
+
+            $token = new PasswordCredentials($oauth2client, $config);
+            $refreshToken = new RefreshToken($oauth2client, $config);
+
+            $oauth2 = new Oauth2Subscriber($token, $refreshToken);
+
+            $client = new Client([
+                'defaults' => [
+                    'auth' => 'oauth2',
+                    'subscribers' => [$oauth2],
+                ],
+            ]);
+
+            $res = $client->get('user');
+
+            
+            dd($res->json());
+
 
         }
         else if ($service === 'bitbucket')
@@ -49,8 +79,8 @@ class IntegrationController extends Controller
 
             $client = new Client(['base_url' => 'https://api.bitbucket.org/2.0/']);
             $oauth = new Oauth1([
-                'consumer_key'    => 'gS2JYF5M69zxgRu8G3',
-                'consumer_secret' => 'BeQaWZPyYPwBQyRMHTSNsUFGrPPxaAZR',
+                'consumer_key'    => env('BITBUCKET_CLIENT_ID'),
+                'consumer_secret' => env('BITBUCKET_CLIENT_SECRET'),
                 'token'           => $token,
                 'token_secret'    => $tokenSecret
             ]);
